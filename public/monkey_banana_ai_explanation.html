@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Monkey and Banana Problem: AI Planning & Search Algorithms (BFS vs DFS)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 10pt;
+      line-height: 1.55;
+      color: #1e293b;
+      background: #ffffff;
+    }
+
+    .cover {
+      page-break-after: always;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 85vh;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 30px;
+    }
+
+    .doc-badge {
+      display: inline-block;
+      align-self: flex-start;
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 8.5pt;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26pt;
+      font-weight: 800;
+      line-height: 1.15;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 13pt;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    .meta-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-top: 15px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      font-size: 9pt;
+    }
+
+    .meta-item strong {
+      color: #0f172a;
+      display: block;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 24px;
+      margin-bottom: 10px;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding-bottom: 4px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11pt;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin-bottom: 10px;
+      text-align: justify;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    .callout {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 12px 0;
+      font-size: 9pt;
+    }
+
+    .callout.warning {
+      background: #fffbeb;
+      border-left-color: #f59e0b;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      background: #f1f5f9;
+      padding: 1px 4px;
+      border-radius: 4px;
+      color: #0f172a;
+    }
+
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin: 10px 0;
+      overflow-x: auto;
+      line-height: 1.4;
+      page-break-inside: avoid;
+    }
+
+    .math-block {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 14px;
+      margin: 10px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+    }
+
+    .page-break {
+      page-break-after: always;
+    }
+
+    .footer {
+      font-size: 7.5pt;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 30px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- COVER PAGE -->
+  <div class="cover">
+    <div class="doc-badge">AISC Academic Reference &amp; Technical Report</div>
+    <h1>The Monkey and Banana Problem</h1>
+    <div class="subtitle">
+      Formal State-Space Problem Formulation, Means-Ends Deliberation, and Comparative Analysis of Uninformed Search Algorithms (BFS vs. DFS)
+    </div>
+
+    <div class="meta-box">
+      <div class="meta-item">
+        <strong>Domain</strong>
+        Artificial Intelligence &amp; Cognitive Science (AISC)
+      </div>
+      <div class="meta-item">
+        <strong>Core Topic</strong>
+        State-Space Search, Graph Traversal &amp; Planning
+      </div>
+      <div class="meta-item">
+        <strong>Algorithms Evaluated</strong>
+        Breadth-First Search (BFS) &amp; Depth-First Search (DFS)
+      </div>
+      <div class="meta-item">
+        <strong>Application</strong>
+        Interactive Intelligent Game System
+      </div>
+    </div>
+
+    <div style="margin-top: 40px; font-size: 9pt; color: #475569; line-height: 1.6;">
+      <strong>Executive Abstract:</strong> The Monkey and Banana problem is a seminal benchmark in both Artificial Intelligence and Cognitive Science. First studied empirically by Gestalt psychologist Wolfgang Köhler (1925) to investigate insight problem solving in primates, it was subsequently formalized in symbolic AI by John McCarthy and Allen Newell as an archetypal planning problem. This report details the complete formal formulation of the state space, defines the transition operators, and presents an in-depth comparative evaluation of Breadth-First Search (BFS) and Depth-First Search (DFS) in solving the planning task.
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <h2>1. Introduction &amp; Cognitive Science Context</h2>
+  <p>
+    In classical behavioral psychology (e.g., Edward Thorndike’s operant conditioning), animal problem solving was long asserted to proceed solely via mechanical, reinforcement-driven trial and error. In 1925, Gestalt psychologist <strong>Wolfgang Köhler</strong> challenged this paradigm at the Anthropoid Research Station on Tenerife. Köhler placed a chimpanzee (notably <em>Sultan</em>) in an enclosure where bananas hung from the ceiling beyond direct vertical reach, accompanied by movable wooden boxes placed in disparate locations.
+  </p>
+  <p>
+    Rather than endless blind flailing, Köhler observed a distinct cognitive phenomenon: the animal engaged in a period of apparent contemplation ("insight"), abruptly followed by a coherent, goal-directed sequence of instrumental actions: walking to the box, pushing it directly beneath the fruit, climbing atop it, and seizing the reward.
+  </p>
+  <p>
+    In Cognitive Science and AI, this problem epitomizes <strong>means-ends analysis</strong> and <strong>deliberative state-space planning</strong>. The agent must recognize that an immediate goal (grasping the banana) is obstructed by an unfulfilled precondition (vertical elevation), which recursively spawns a sub-goal (climbing the box), which itself depends on another precondition (box alignment beneath the reward).
+  </p>
+
+  <!-- SECTION 2 -->
+  <h2>2. Formal State-Space Problem Formulation</h2>
+  <p>
+    In classical AI planning (Russell &amp; Norvig, 2020), an environment is mathematically characterized by a 5-tuple:
+  </p>
+  <div class="math-block">
+    &Pi; = &lang; S, S_0, G, A, T &rang;
+  </div>
+
+  <h3>2.1 State Representation (S)</h3>
+  <p>
+    Each discrete state <code>s &in; S</code> captures the complete configuration of the environment:
+  </p>
+  <div class="math-block">
+    s = (monkeyPos, boxPos, bananaPos, onBox, hasBanana)<br>
+    where:<br>
+    &bull; monkeyPos &in; { Left, Center, Right }<br>
+    &bull; boxPos &in; { Left, Center, Right }<br>
+    &bull; bananaPos &in; { Left, Center, Right }<br>
+    &bull; onBox &in; { True, False }<br>
+    &bull; hasBanana &in; { True, False }
+  </div>
+  <p>
+    With 3 monkey locations, 3 box locations, 3 banana locations, 2 vertical elevations, and 2 collection states, the theoretical product state space is <code>3 &times; 3 &times; 3 &times; 2 &times; 2 = 108</code> states. However, physical constraints (e.g., monkey can only be on the box if <code>monkeyPos == boxPos</code>) restrict the physically reachable valid state space to approximately <strong>24 to 36 states</strong>, creating an ideal discrete graph for search tree analysis.
+  </p>
+
+  <h3>2.2 Initial State (S<sub>0</sub>) and Goal Test (G)</h3>
+  <ul>
+    <li><strong>Typical Initial State S<sub>0</sub>:</strong> <code>(Left, Center, Right, False, False)</code> &mdash; monkey at Left, box at Center, banana at Right, monkey on ground, banana ungrabbed.</li>
+    <li><strong>Goal Condition G(s):</strong> <code>s.hasBanana == True</code>.</li>
+  </ul>
+
+  <h3>2.3 Action Operators (A) and Transition Model (T)</h3>
+  <p>
+    Transitions are defined by strict preconditions and state modifications (effects):
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Action</th>
+        <th>Parameters</th>
+        <th>Preconditions</th>
+        <th>Effects (State Transition)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>Walk(to)</code></td>
+        <td><code>to &in; {L, C, R}</code></td>
+        <td><code>!onBox &and; isAdjacent(monkeyPos, to)</code></td>
+        <td><code>monkeyPos &larr; to</code></td>
+      </tr>
+      <tr>
+        <td><code>PushBox(to)</code></td>
+        <td><code>to &in; {L, C, R}</code></td>
+        <td><code>!onBox &and; monkeyPos == boxPos &and; isAdjacent(boxPos, to)</code></td>
+        <td><code>boxPos &larr; to, monkeyPos &larr; to</code></td>
+      </tr>
+      <tr>
+        <td><code>ClimbBox</code></td>
+        <td>None</td>
+        <td><code>!onBox &and; monkeyPos == boxPos</code></td>
+        <td><code>onBox &larr; True</code></td>
+      </tr>
+      <tr>
+        <td><code>ClimbDown</code></td>
+        <td>None</td>
+        <td><code>onBox == True</code></td>
+        <td><code>onBox &larr; False</code></td>
+      </tr>
+      <tr>
+        <td><code>GrabBanana</code></td>
+        <td>None</td>
+        <td><code>onBox == True &and; boxPos == bananaPos &and; !hasBanana</code></td>
+        <td><code>hasBanana &larr; True</code> (Goal reached)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 3 -->
+  <h2>3. Why Search Algorithms Are Required</h2>
+  <p>
+    An intelligent agent cannot reach the goal by reflex alone. The action space contains:
+  </p>
+  <ul>
+    <li><strong>Branching choices:</strong> At any ground state, the monkey can choose to walk in multiple directions, push the box, or climb up prematurely.</li>
+    <li><strong>Irrelevant &amp; Detrimental Actions:</strong> Climbing onto the box when it is not under the banana leads to a dead end where the banana cannot be reached. Walking away from the box increases the path length.</li>
+    <li><strong>Cycles &amp; Loops:</strong> A naive agent could walk back and forth indefinitely between Left and Center (<code>Left &rarr; Center &rarr; Left &rarr; ...</code>).</li>
+  </ul>
+  <p>
+    To resolve this, the problem is formulated as <strong>graph search over the state-space</strong>. An algorithm constructs a <strong>Search Tree</strong> whose root is <code>S<sub>0</sub></code>, whose edges represent actions, and whose nodes represent states reached. The goal is to discover an action sequence &pi; = &lang;a<sub>1</sub>, a<sub>2</sub>, ..., a<sub>k</sub>&rang; leading to a node satisfying <code>G(s)</code>.
+  </p>
+
+  <!-- SECTION 4 -->
+  <h2>4. In-Depth Algorithm Analysis: BFS vs. DFS</h2>
+
+  <h3>4.1 Breadth-First Search (BFS)</h3>
+  <p>
+    <strong>Core Operational Mechanism:</strong> BFS expands the state space level-by-level using a First-In, First-Out (FIFO) queue. It examines all states at depth <code>d</code> before examining any state at depth <code>d + 1</code>.
+  </p>
+  <ul>
+    <li><strong>Optimality:</strong> <strong>Guaranteed optimal.</strong> When step costs are uniform (each action costs 1 unit), BFS is mathematically proven to find the path with the minimum number of steps. For the monkey, BFS will never suggest a redundant loop.</li>
+    <li><strong>Completeness:</strong> <strong>Complete.</strong> If a solution exists, BFS will invariably discover it, even in infinite state graphs (provided the branching factor <code>b</code> is finite).</li>
+    <li><strong>Time Complexity:</strong> <code>O(b<sup>d</sup>)</code>, where <code>b</code> is the branching factor (~2-3 in this game) and <code>d</code> is the depth of the shallowest goal (~4-5 steps). Total states explored: ~15 to 30 nodes.</li>
+    <li><strong>Space Complexity:</strong> <code>O(b<sup>d</sup>)</code>. Every explored node is retained in the frontier or closed set. While memory-intensive in massive domains, for the Monkey &amp; Banana problem, the memory footprint is negligible (&lt; 100 KB).</li>
+  </ul>
+
+  <div class="callout">
+    <div class="callout-title">Why BFS is the Ideal Solver for This Problem:</div>
+    Because we want the monkey to behave intelligently and efficiently, BFS produces the concise, elegant solution without erratic detours: <code>Walk &rarr; Push &rarr; Climb &rarr; Grab</code>.
+  </div>
+
+  <h3>4.2 Depth-First Search (DFS)</h3>
+  <p>
+    <strong>Core Operational Mechanism:</strong> DFS dives as deep as possible along each branch using a Last-In, First-Out (LIFO) stack (or recursion) before backtracking when a dead-end or cycle is hit.
+  </p>
+  <ul>
+    <li><strong>Optimality:</strong> <strong>Not optimal.</strong> DFS returns the <em>first</em> solution path it stumbles across. If the left branch happens to explore unnecessary steps (e.g., walking to the opposite wall, climbing onto the box in the wrong place, climbing down, and only then pushing), DFS will return that convoluted 8-step path rather than the optimal 4-step path.</li>
+    <li><strong>Completeness:</strong> Only complete in finite graphs with strict <strong>cycle detection (closed list)</strong>. Without cycle detection, DFS can enter an infinite loop walking back and forth between two adjacent tiles.</li>
+    <li><strong>Time Complexity:</strong> <code>O(b<sup>m</sup>)</code>, where <code>m</code> is the maximum tree depth. In worst-case scenarios, DFS may explore all valid permutations before finding the goal.</li>
+    <li><strong>Space Complexity:</strong> <code>O(b &times; m)</code>. DFS only needs to store the current path and unexplored sibling nodes. This linear memory advantage makes it famous in tree search, though less crucial in small discrete state spaces.</li>
+  </ul>
+
+  <div class="callout warning">
+    <div class="callout-title">The Danger of Cycles in DFS:</div>
+    Because actions like <code>Walk(Left)</code> and <code>Walk(Right)</code> are reversible inverses, DFS without a visited set will loop infinitely between <code>(Left, Center, Right...)</code> and never reach the goal. Our system enforces an active explored set to guarantee termination.
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 5 -->
+  <h2>5. Comparative Evaluation Matrix</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Evaluation Dimension</th>
+        <th>Breadth-First Search (BFS)</th>
+        <th>Depth-First Search (DFS)</th>
+        <th>Impact on Monkey &amp; Banana System</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Data Structure</strong></td>
+        <td>FIFO Queue</td>
+        <td>LIFO Stack / Recursion</td>
+        <td>Determines traversal order of state space.</td>
+      </tr>
+      <tr>
+        <td><strong>Path Optimality</strong></td>
+        <td><strong>Guaranteed Minimal Steps</strong></td>
+        <td>Non-optimal (can take long detours)</td>
+        <td>BFS produces 4-step plans; DFS may generate 7+ steps.</td>
+      </tr>
+      <tr>
+        <td><strong>Completeness</strong></td>
+        <td>Always complete</td>
+        <td>Complete only with cycle check</td>
+        <td>Cycle checking is mandatory for DFS to avoid infinite ping-pong.</td>
+      </tr>
+      <tr>
+        <td><strong>Time Complexity</strong></td>
+        <td><code>O(b<sup>d</sup>)</code></td>
+        <td><code>O(b<sup>m</sup>)</code></td>
+        <td>BFS finds shallow solution quickly; DFS may search deeper subtrees first.</td>
+      </tr>
+      <tr>
+        <td><strong>Space Complexity</strong></td>
+        <td><code>O(b<sup>d</sup>)</code> (Exponential)</td>
+        <td><code>O(b &times; m)</code> (Linear)</td>
+        <td>Not a bottleneck in this problem due to bounded state size.</td>
+      </tr>
+      <tr>
+        <td><strong>Tree Visualization</strong></td>
+        <td>Balanced, level-by-level breadth</td>
+        <td>Deep, asymmetric elongated branch</td>
+        <td>Visually demonstrates search paradigm differences to students.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 6 -->
+  <h2>6. Step-by-Step Solution Trace</h2>
+  <p>
+    Consider the canonical scenario: <code>Monkey: Left</code>, <code>Box: Center</code>, <code>Banana: Right</code>.
+  </p>
+
+  <h3>BFS Optimal Solution Trace (4 Steps):</h3>
+  <ol>
+    <li>
+      <strong>Depth 0 &rarr; 1:</strong> <code>Walk Right to Center</code><br>
+      <em>State:</em> <code>(Center, Center, Right, onBox=False, hasBanana=False)</code><br>
+      <em>Reasoning:</em> Monkey closes distance to box. Precondition for pushing satisfied.
+    </li>
+    <li>
+      <strong>Depth 1 &rarr; 2:</strong> <code>Push Box Right to Right</code><br>
+      <em>State:</em> <code>(Right, Right, Right, onBox=False, hasBanana=False)</code><br>
+      <em>Reasoning:</em> Monkey moves the box beneath the banana. Precondition for goal grab satisfied.
+    </li>
+    <li>
+      <strong>Depth 2 &rarr; 3:</strong> <code>Climb Box</code><br>
+      <em>State:</em> <code>(Right, Right, Right, onBox=True, hasBanana=False)</code><br>
+      <em>Reasoning:</em> Monkey elevates onto box. Elevation precondition satisfied.
+    </li>
+    <li>
+      <strong>Depth 3 &rarr; 4:</strong> <code>Grab Banana</code><br>
+      <em>State:</em> <code>(Right, Right, Right, onBox=True, hasBanana=True)</code><br>
+      <em>Reasoning:</em> <strong>Goal Achieved!</strong> Solution path length = 4 actions.
+    </li>
+  </ol>
+
+  <!-- SECTION 7 -->
+  <h2>7. Conclusion &amp; Key Insights</h2>
+  <p>
+    The Monkey and Banana problem is much more than an amusing game: it is the quintessential demonstration of how a symbolic agent transforms an abstract physical scenario into a graph traversal problem.
+  </p>
+  <ul>
+    <li><strong>BFS</strong> provides the <em>rational gold standard</em> for AI agents in discrete unweighted worlds, producing the most direct, economical plan.</li>
+    <li><strong>DFS</strong> illustrates the behavior of depth-oriented heuristics and exposes the hazards of infinite loops and suboptimality in state graphs without path pruning.</li>
+    <li>Integrating real search algorithms with an animated visual frontend bridges the gap between formal algorithmic theory and intuitive cognitive understanding.</li>
+  </ul>
+
+  <div class="footer">
+    AI-Powered Monkey &amp; Banana Planning System &bull; Artificial Intelligence &amp; Cognitive Science (AISC) Project &bull; Generated Technical Report
+  </div>
+
+</body>
+</html>
